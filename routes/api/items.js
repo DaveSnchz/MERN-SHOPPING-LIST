@@ -28,12 +28,16 @@ router.post('/', (req, res) => {
 // @desc    Delete An Item
 // @access  Public
 router.delete('/:id', (req, res) => {
-   Item.findById(req.params.id)
-   .then(item => item.remove().then(() => res.json({success: true})))
-  
-   .catch(err => res.status(404).json({sucess: false}));
-  })
-
-  
+  Item.findById(req.params.id)
+      .then(item => {
+          if (!item) {
+              return res.status(404).json({ success: false, message: 'Item not found' });
+          }
+          Item.deleteOne({ _id: req.params.id })
+              .then(() => res.json({ success: true }))
+              .catch(err => res.status(500).json({ success: false, error: err.message }));
+      })
+      .catch(err => res.status(404).json({ success: false, error: err.message }));
+});
 
 module.exports = router;
